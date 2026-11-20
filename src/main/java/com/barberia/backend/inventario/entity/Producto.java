@@ -25,7 +25,7 @@ public class Producto {
         private String categoria;
 
         @Column(name = "precio_venta", nullable = false, precision = 10, scale = 2)
-        private BigDecimal precioVenta;
+        private double precioVenta;
 
         @Column(name = "stock_actual", nullable = false)
         private Integer stockActual;
@@ -37,7 +37,7 @@ public class Producto {
         }
 
         public Producto(String nombre, String descripcion,
-                        String categoria, BigDecimal precioVenta,
+                        String categoria, double precioVenta,
                         Integer stockActual) {
             this.nombre = nombre;
             this.descripcion = descripcion;
@@ -79,11 +79,11 @@ public class Producto {
             this.categoria = categoria;
         }
 
-        public BigDecimal getPrecioVenta() {
+        public double getPrecioVenta() {
             return precioVenta;
         }
 
-        public void setPrecioVenta(BigDecimal precioVenta) {
+        public void setPrecioVenta(double precioVenta) {
             this.precioVenta = precioVenta;
         }
 
