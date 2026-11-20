@@ -3,7 +3,7 @@ package com.barberia.backend.inventario.entity;
 
 import jakarta.persistence.*;
 
-import java.math.BigDecimal;
+
 
 
 @Entity
@@ -24,7 +24,7 @@ public class Producto {
         @Column(length = 60)
         private String categoria;
 
-        @Column(name = "precio_venta", nullable = false, precision = 10, scale = 2)
+        @Column(name = "precio_venta", nullable = false)
         private double precioVenta;
 
         @Column(name = "stock_actual", nullable = false)
