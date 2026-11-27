@@ -8,6 +8,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @RestController
 @RequestMapping("/productos")
 public class ProductoController {
@@ -20,8 +22,10 @@ public class ProductoController {
         this.productoService = productoService;
     }
 
-
-
+    @GetMapping
+    public List<ProductoDto> getAllProductos(){
+        return productoService.getAllProductos();
+    }
    @GetMapping("/{id}")
     public ResponseEntity <ProductoDto> getProductoById(@PathVariable Long id){
 

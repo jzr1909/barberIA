@@ -2,7 +2,7 @@ package com.barberia.backend.inventario.dto;
 
 public class ProductoDto {
 
-    private Long idProdcuto;
+    private Long idProducto;
     private String nombre;
     private String descripcion;
     private String categoria;
@@ -10,8 +10,8 @@ public class ProductoDto {
     private Integer stockActual;
     private Boolean estado;
 
-    public ProductoDto(Long idProdcuto, String nombre, String descripcion, double precioVenta, String categoria, Integer stockActual, Boolean estado) {
-        this.idProdcuto = idProdcuto;
+    public ProductoDto(Long idProducto, String nombre, String descripcion, double precioVenta, String categoria, Integer stockActual, Boolean estado) {
+        this.idProducto = idProducto;
         this.nombre = nombre;
         this.descripcion = descripcion;
         this.precioVenta = precioVenta;
@@ -23,12 +23,12 @@ public class ProductoDto {
     public ProductoDto() {
     }
 
-    public Long getIdProdcuto() {
-        return idProdcuto;
+    public Long getIdProducto() {
+        return idProducto;
     }
 
-    public void setIdProdcuto(Long idProdcuto) {
-        this.idProdcuto = idProdcuto;
+    public void setIdProducto(Long idProducto) {
+        this.idProducto = idProducto;
     }
 
     public String getNombre() {
@@ -77,5 +77,18 @@ public class ProductoDto {
 
     public void setEstado(Boolean estado) {
         this.estado = estado;
+    }
+
+    @Override
+    public String toString() {
+        return "ProductoDto{" +
+                "idProducto=" + idProducto +
+                ", nombre='" + nombre + '\'' +
+                ", descripcion='" + descripcion + '\'' +
+                ", categoria='" + categoria + '\'' +
+                ", precioVenta=" + precioVenta +
+                ", stockActual=" + stockActual +
+                ", estado=" + estado +
+                '}';
     }
 }

@@ -5,6 +5,9 @@ import com.barberia.backend.inventario.entity.Producto;
 import com.barberia.backend.inventario.repository.ProductoRepository;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
+import java.util.List;
+
 @Service
 public class ProductoService {
 
@@ -14,6 +17,18 @@ public class ProductoService {
         this.productoRepository = productoRepository;
     }
 
+    public List<ProductoDto> getAllProductos(){
+
+        List<Producto> productos = productoRepository.findAll();
+        List<ProductoDto> productosDtos = new ArrayList<>();
+
+        for(Producto producto: productos){
+            ProductoDto dto = convertToDto(producto);
+            productosDtos.add(dto);
+        }
+
+        return productosDtos;
+    }
     public ProductoDto getProductById(Long id){
 
         Producto producto = productoRepository.findById(id).orElse(null);
@@ -30,7 +45,7 @@ public class ProductoService {
         Producto producto = convertToEntity(productoDto);
         Producto savedProducto = productoRepository.save(producto);
 
-        return convertToDto(producto);
+        return convertToDto(savedProducto);
     }
 
     public ProductoDto updateProducto(ProductoDto existingProducto, ProductoDto productoDto){
@@ -58,12 +73,13 @@ public class ProductoService {
     public ProductoDto convertToDto(Producto producto){
 
         ProductoDto dto = new ProductoDto();
-        dto.setIdProdcuto(producto.getIdProducto());
+        dto.setIdProducto(producto.getIdProducto());
         dto.setNombre(producto.getNombre());
         dto.setDescripcion(producto.getDescripcion());
         dto.setCategoria(producto.getCategoria());
         dto.setPrecioVenta(producto.getPrecioVenta());
         dto.setStockActual(producto.getStockActual());
+        dto.setEstado(producto.getEstado());
 
         return dto;
     }
@@ -71,12 +87,13 @@ public class ProductoService {
     public Producto convertToEntity(ProductoDto productoDto){
 
         Producto producto = new Producto();
-        producto.setIdProducto(productoDto.getIdProdcuto());
+        producto.setIdProducto(productoDto.getIdProducto());
         producto.setNombre(productoDto.getNombre());
         producto.setDescripcion(productoDto.getDescripcion());
         producto.setCategoria(productoDto.getCategoria());
         producto.setPrecioVenta(productoDto.getPrecioVenta());
         producto.setStockActual(productoDto.getStockActual());
+        producto.setEstado(productoDto.getEstado());
 
         return producto;
     }
