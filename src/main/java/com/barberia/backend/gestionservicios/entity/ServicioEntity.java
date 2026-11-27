@@ -1,3 +1,4 @@
+
 package com.barberia.backend.gestionservicios.entity;
 
 import jakarta.persistence.*;
@@ -29,8 +30,9 @@ public class ServicioEntity {
     public ServicioEntity() {
     }
 
-    public ServicioEntity(Long id, String nombre, String descripcion, BigDecimal precio,
-                          Integer duracionMinutos, Boolean activo) {
+    public ServicioEntity(Long id, String nombre, String descripcion,
+                          BigDecimal precio, Integer duracionMinutos,
+                          Boolean activo) {
         this.id = id;
         this.nombre = nombre;
         this.descripcion = descripcion;

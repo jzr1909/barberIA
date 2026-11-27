@@ -1,7 +1,9 @@
+
 package com.barberia.backend.gestionservicios.service;
 
 import com.barberia.backend.gestionservicios.entity.ServicioEntity;
 import com.barberia.backend.gestionservicios.repository.ServicioRepository;
+
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
@@ -18,85 +20,167 @@ public class ServicioService {
         this.servicioRepository = servicioRepository;
     }
 
-    public List<ServicioEntity> listarServicios(Boolean activo, String nombre) {
+    // Consultar servicios (RF15)
+    public List<ServicioEntity> listarServicios(
+            Boolean activo, String nombre) {
+
         if (activo != null && nombre != null && !nombre.isBlank()) {
-            return servicioRepository.findByActivoAndNombreContainingIgnoreCase(activo, nombre.trim());
+            return servicioRepository
+                    .findByActivoAndNombreContainingIgnoreCase(
+                            activo, nombre.trim());
         }
+
         if (activo != null) {
             return servicioRepository.findByActivo(activo);
         }
+
         if (nombre != null && !nombre.isBlank()) {
-            return servicioRepository.findByNombreContainingIgnoreCase(nombre.trim());
+            return servicioRepository
+                    .findByNombreContainingIgnoreCase(nombre.trim());
         }
+
         return servicioRepository.findAll();
     }
 
+    // Buscar por ID
     public ServicioEntity obtenerPorId(Long id) {
         return servicioRepository.findById(id)
                 .orElseThrow(() -> new ResponseStatusException(
-                        HttpStatus.NOT_FOUND, "Servicio no encontrado con ID: " + id));
+                        HttpStatus.NOT_FOUND,
+                        "Servicio no encontrado con ID: " + id));
     }
 
+    // Validar información
+    private void validarServicio(ServicioEntity servicio) {
+
+        if (servicio.getNombre() == null ||
+                servicio.getNombre().isBlank()) {
+            throw new ResponseStatusException(
+                    HttpStatus.BAD_REQUEST,
+                    "El nombre es obligatorio");
+        }
+
+        if (servicio.getDescripcion() == null ||
+                servicio.getDescripcion().isBlank()) {
+            throw new ResponseStatusException(
+                    HttpStatus.BAD_REQUEST,
+                    "La descripción es obligatoria");
+        }
+
+        if (servicio.getPrecio() == null ||
+                servicio.getPrecio().compareTo(BigDecimal.ZERO) <= 0) {
+            throw new ResponseStatusException(
+                    HttpStatus.BAD_REQUEST,
+                    "El precio debe ser mayor que cero");
+        }
+
+        if (servicio.getDuracionMinutos() == null ||
+                servicio.getDuracionMinutos() <= 0) {
+            throw new ResponseStatusException(
+                    HttpStatus.BAD_REQUEST,
+                    "La duración debe ser mayor que cero");
+        }
+    }
+
+    // Registrar servicio (RF14)
     public ServicioEntity crearServicio(ServicioEntity nuevoServicio) {
-        if (nuevoServicio.getNombre() == null || nuevoServicio.getNombre().isBlank()) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "El nombre del servicio es obligatorio");
+
+        validarServicio(nuevoServicio);
+
+        String nombre = nuevoServicio.getNombre().trim();
+
+        if (servicioRepository.existsByNombreIgnoreCase(nombre)) {
+            throw new ResponseStatusException(
+                    HttpStatus.CONFLICT,
+                    "Ya existe un servicio con ese nombre");
         }
-        if (nuevoServicio.getPrecio() == null || nuevoServicio.getPrecio().compareTo(BigDecimal.ZERO) < 0) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "El precio debe ser mayor o igual a 0");
-        }
-        if (nuevoServicio.getDuracionMinutos() == null || nuevoServicio.getDuracionMinutos() <= 0) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "La duración en minutos debe ser mayor a 0");
-        }
-        if (nuevoServicio.getActivo() == null) {
-            nuevoServicio.setActivo(true);
-        }
+
+        nuevoServicio.setNombre(nombre);
         nuevoServicio.setId(null);
+        nuevoServicio.setActivo(true);
+
         return servicioRepository.save(nuevoServicio);
     }
 
-    public ServicioEntity actualizarServicio(Long id, ServicioEntity datosActualizados) {
+    // Actualizar servicio (RF16)
+    public ServicioEntity actualizarServicio(
+            Long id, ServicioEntity datosActualizados) {
+
         ServicioEntity existente = obtenerPorId(id);
 
-        if (datosActualizados.getNombre() == null || datosActualizados.getNombre().isBlank()) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "El nombre del servicio es obligatorio");
-        }
-        if (datosActualizados.getPrecio() == null || datosActualizados.getPrecio().compareTo(BigDecimal.ZERO) < 0) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "El precio debe ser mayor o igual a 0");
-        }
-        if (datosActualizados.getDuracionMinutos() == null || datosActualizados.getDuracionMinutos() <= 0) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "La duración en minutos debe ser mayor a 0");
+        validarServicio(datosActualizados);
+
+        String nombre = datosActualizados.getNombre().trim();
+
+        if (servicioRepository
+                .existsByNombreIgnoreCaseAndIdNot(nombre, id)) {
+            throw new ResponseStatusException(
+                    HttpStatus.CONFLICT,
+                    "Ya existe otro servicio con ese nombre");
         }
 
-        existente.setNombre(datosActualizados.getNombre().trim());
+        existente.setNombre(nombre);
         existente.setDescripcion(datosActualizados.getDescripcion());
         existente.setPrecio(datosActualizados.getPrecio());
-        existente.setDuracionMinutos(datosActualizados.getDuracionMinutos());
-        existente.setActivo(datosActualizados.getActivo() != null ? datosActualizados.getActivo() : existente.getActivo());
+        existente.setDuracionMinutos(
+                datosActualizados.getDuracionMinutos());
 
         return servicioRepository.save(existente);
     }
 
-    public ServicioEntity actualizarParcialmente(Long id, ServicioParcialRequest cambios) {
+    // Actualizar parcialmente (RF17)
+    public ServicioEntity actualizarParcialmente(
+            Long id, ServicioParcialRequest cambios) {
+
         ServicioEntity existente = obtenerPorId(id);
 
-        if (cambios.getNombre() != null && !cambios.getNombre().isBlank()) {
-            existente.setNombre(cambios.getNombre().trim());
+        if (cambios.getNombre() != null) {
+            String nombre = cambios.getNombre().trim();
+
+            if (nombre.isBlank()) {
+                throw new ResponseStatusException(
+                        HttpStatus.BAD_REQUEST,
+                        "El nombre no puede estar vacío");
+            }
+
+            if (servicioRepository
+                    .existsByNombreIgnoreCaseAndIdNot(nombre, id)) {
+                throw new ResponseStatusException(
+                        HttpStatus.CONFLICT,
+                        "Ya existe otro servicio con ese nombre");
+            }
+
+            existente.setNombre(nombre);
         }
+
         if (cambios.getDescripcion() != null) {
+            if (cambios.getDescripcion().isBlank()) {
+                throw new ResponseStatusException(
+                        HttpStatus.BAD_REQUEST,
+                        "La descripción no puede estar vacía");
+            }
             existente.setDescripcion(cambios.getDescripcion());
         }
+
         if (cambios.getPrecio() != null) {
-            if (cambios.getPrecio().compareTo(BigDecimal.ZERO) < 0) {
-                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "El precio debe ser mayor o igual a 0");
+            if (cambios.getPrecio().compareTo(BigDecimal.ZERO) <= 0) {
+                throw new ResponseStatusException(
+                        HttpStatus.BAD_REQUEST,
+                        "El precio debe ser mayor que cero");
             }
             existente.setPrecio(cambios.getPrecio());
         }
+
         if (cambios.getDuracionMinutos() != null) {
             if (cambios.getDuracionMinutos() <= 0) {
-                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "La duración en minutos debe ser mayor a 0");
+                throw new ResponseStatusException(
+                        HttpStatus.BAD_REQUEST,
+                        "La duración debe ser mayor que cero");
             }
-            existente.setDuracionMinutos(cambios.getDuracionMinutos());
+            existente.setDuracionMinutos(
+                    cambios.getDuracionMinutos());
         }
+
         if (cambios.getActivo() != null) {
             existente.setActivo(cambios.getActivo());
         }
@@ -104,12 +188,15 @@ public class ServicioService {
         return servicioRepository.save(existente);
     }
 
+    // Eliminar servicio físicamente
     public void eliminarServicio(Long id) {
         ServicioEntity existente = obtenerPorId(id);
         servicioRepository.delete(existente);
     }
 
+    // Datos para actualización parcial
     public static class ServicioParcialRequest {
+
         private String nombre;
         private String descripcion;
         private BigDecimal precio;
